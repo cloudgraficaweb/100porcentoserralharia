@@ -17,7 +17,7 @@
       border-radius: 15px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
-    h2 {
+    h2, h3 {
       color: #2c3e50;
       margin-bottom: 20px;
       font-weight: 600;
@@ -150,6 +150,36 @@
         <label for="responsavel">Responsável:</label>
         <input type="text" id="responsavel" name="responsavel" required>
       </div>
+      <h3>Informações de PIX</h3>
+      <div class="form-group">
+        <label for="exibirPix">Exibir Pix?</label>
+        <select id="exibirPix" name="exibirPix" onchange="togglePixFields()">
+          <option value="sim">Sim</option>
+          <option value="nao">Não</option>
+        </select>
+      </div>
+      <div id="pixFields">
+        <div class="form-group">
+          <label for="pixTipo">Tipo de Chave PIX:</label>
+          <select id="pixTipo" name="pixTipo">
+            <option value="cpf">CPF</option>
+            <option value="telefone">Telefone</option>
+            <option value="email">E-mail</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="pixChave">Chave PIX:</label>
+          <input type="text" id="pixChave" name="pixChave" value="064.555.054.09" required>
+        </div>
+        <div class="form-group">
+          <label for="pixNome">Nome do Titular PIX:</label>
+          <input type="text" id="pixNome" name="pixNome" value="JADILSON FRANCISCO DA SILVA" required>
+        </div>
+        <div class="form-group">
+          <label for="pixBanco">Banco:</label>
+          <input type="text" id="pixBanco" name="pixBanco" value="BANCO INTER" required>
+        </div>
+      </div>
       <button type="button" onclick="generatePDF()">Gerar PDF</button>
     </form>
   </div>
@@ -170,6 +200,17 @@
       } else {
         reciboFields.classList.add('hidden');
         ordemServicoFields.classList.remove('hidden');
+      }
+    }
+
+    function togglePixFields() {
+      const exibirPix = document.getElementById('exibirPix').value;
+      const pixFields = document.getElementById('pixFields');
+
+      if (exibirPix === 'sim') {
+        pixFields.classList.remove('hidden');
+      } else {
+        pixFields.classList.add('hidden');
       }
     }
 
@@ -269,27 +310,36 @@
       doc.setFont("helvetica", "normal");
       doc.text(document.getElementById('responsavel').value, 20, finalY + 55);
 
+      // Adicionar informações de PIX
+      if (document.getElementById('exibirPix').value === 'sim') {
+        doc.setFont("helvetica", "bold");
+        doc.text("Informações de PIX:", 20, finalY + 70);
+        doc.setFont("helvetica", "normal");
+        doc.text("Tipo: " + document.getElementById('pixTipo').value, 20, finalY + 80);
+        doc.text("Chave: " + document.getElementById('pixChave').value, 20, finalY + 90);
+        doc.text("Nome: " + document.getElementById('pixNome').value, 20, finalY + 100);
+        doc.text("Banco: " + document.getElementById('pixBanco').value, 20, finalY + 110);
+      }
+
       doc.save(`${title}_` + document.getElementById('numeroDocumento').value + ".pdf");
     }
 
-    // Adicionar um item inicial
-    addItem();
-
-    // Definir o número da ordem e a data de emissão
     function setDefaultValues() {
       const today = new Date();
       const dd = String(today.getDate()).padStart(2, '0');
       const mm = String(today.getMonth() + 1).padStart(2, '0');
       const yyyy = today.getFullYear();
 
-      document.getElementById('numeroDocumento').value = yyyy + mm + dd;
+      document.getElementById('numeroDocumento').value = dd + mm + yyyy;
       document.getElementById('dataEmissao').value = yyyy + '-' + mm + '-' + dd;
     }
 
-    // Chamar a função quando a página carregar
+    // Adicionar um item inicial e definir valores padrão quando a página carregar
     window.onload = function() {
+      addItem();
       setDefaultValues();
       toggleDocumentFields();
+      togglePixFields();
     };
   </script>
 </body></html>
